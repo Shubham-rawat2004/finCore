@@ -1,5 +1,6 @@
 package com.rawat.FinCore.DTO;
 
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.LocalDate;
 public class CustomerRequest {
     private String name;
     private LocalDate dateOfBirth;
+    @Email
     private String email;
     private String phone;
     private String addressLine1;

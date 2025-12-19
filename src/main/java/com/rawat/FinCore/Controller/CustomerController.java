@@ -1,0 +1,49 @@
+package com.rawat.FinCore.Controller;
+
+import com.rawat.FinCore.DTO.CustomerRequest;
+import com.rawat.FinCore.DTO.CustomerResponse;
+import com.rawat.FinCore.Service.CustomerService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/customers")
+public class CustomerController {
+
+    private final CustomerService customerService;
+
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
+    @PostMapping
+    public ResponseEntity<CustomerResponse> create(@RequestBody CustomerRequest request) {
+        CustomerResponse response = customerService.createCustomer(request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public CustomerResponse update(@PathVariable Long id,
+                                   @RequestBody CustomerRequest request) {
+        return customerService.updateCustomer(id, request);
+    }
+
+    @GetMapping("/{id}")
+    public CustomerResponse getOne(@PathVariable Long id) {
+        return customerService.getCustomer(id);
+    }
+
+    @GetMapping
+    public List<CustomerResponse> getAll() {
+        return customerService.getAllCustomers();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        customerService.deleteCustomer(id);
+        return ResponseEntity.noContent().build();
+    }
+}
