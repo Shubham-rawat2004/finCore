@@ -2,9 +2,12 @@ package com.rawat.FinCore.Entities;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDate;
 
 @Entity
+@Data
 @Table(name = "account_branch")
 public class AccountBranch {
 

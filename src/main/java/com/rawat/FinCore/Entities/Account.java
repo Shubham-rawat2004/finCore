@@ -1,4 +1,3 @@
-// Account.java
 package com.rawat.FinCore.Entities;
 
 import com.rawat.FinCore.Entities.Customer;
@@ -40,7 +39,9 @@ public class Account {
 
     private LocalDate closedDate;
 
-    @ManyToOne(optional = false)
+    // In the database:customer_id cannot be NULL.
+    //If you try to save an Account without setting a customer, Hibernate will throw an exception.
+    @ManyToOne(optional = false)   // An Account cannot exist without a Customer.
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
@@ -56,5 +57,4 @@ public class Account {
     @OneToMany(mappedBy = "account")
     private List<AccountBranch> accountBranches;
 
-    // getters and setters
 }

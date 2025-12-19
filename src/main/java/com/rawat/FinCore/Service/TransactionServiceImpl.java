@@ -59,4 +59,10 @@ public class TransactionServiceImpl implements TransactionService {
                 .map(TransactionMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<Transaction> findByAccountId(Long accountId) {
+        return transactionRepository.findByAccountId(accountId);
+    }
+
 }

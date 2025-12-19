@@ -3,17 +3,12 @@ package com.rawat.FinCore.Service;
 import com.rawat.FinCore.DTO.AccountCreateRequest;
 import com.rawat.FinCore.DTO.AccountResponse;
 import com.rawat.FinCore.DTO.AccountSummaryDto;
-import com.rawat.FinCore.DTO.TransactionRequest;
 import com.rawat.FinCore.Entities.Account;
 import com.rawat.FinCore.Entities.Customer;
-import com.rawat.FinCore.Entities.Transaction;
-import com.rawat.FinCore.Enum.AccountStatus;
-import com.rawat.FinCore.Enum.TransactionStatus;
 import com.rawat.FinCore.Mapper.AccountMapper;
-import com.rawat.FinCore.Mapper.TransactionMapper;
 import com.rawat.FinCore.Repository.AccountRepository;
 import com.rawat.FinCore.Repository.CustomerRepository;
-import com.rawat.FinCore.Repository.TransactionRepository;
+import com.rawat.FinCore.Enum.AccountStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -27,14 +22,11 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
-    private final TransactionRepository transactionRepository;
 
     public AccountServiceImpl(AccountRepository accountRepository,
-                              CustomerRepository customerRepository,
-                              TransactionRepository transactionRepository) {
+                              CustomerRepository customerRepository) {
         this.accountRepository = accountRepository;
         this.customerRepository = customerRepository;
-        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -42,12 +34,22 @@ public class AccountServiceImpl implements AccountService {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new IllegalArgumentException("Customer not found"));
 
-        String accountNumber = generateAccountNumber(); // simple helper method
+        String accountNumber = generateAccountNumber();
         Account account = AccountMapper.toNewEntity(request, customer, accountNumber);
         Account saved = accountRepository.save(account);
         return AccountMapper.toDto(saved);
     }
 
+    @Override
+    public List<Account> findByCustomerCustomerId(Long customerId) {
+        return accountRepository.findByCustomerCustomerId(customerId);
+    }
+
+    @Override
+    public Account findById(Long id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Account not found: " + id));
+    }
 
     @Override
     public AccountResponse getAccount(Long id) {
@@ -72,24 +74,8 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
         ensureActive(account);
-
         account.setBalance(account.getBalance().add(amount));
-
-        Transaction txn = TransactionMapper.toNewEntity(
-                // build a DTO on the fly:
-                new TransactionRequest() {{
-                    setTxnType("DEPOSIT");
-                    setAmount(amount);
-                    setToAccountId(accountId);
-                    setDescription("Cash deposit");
-                }},
-                null,
-                account
-        );
-        txn.setStatus(TransactionStatus.COMPLETED);
-
         accountRepository.save(account);
-        transactionRepository.save(txn);
     }
 
     @Override
@@ -100,27 +86,11 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
         ensureActive(account);
-
         if (account.getBalance().compareTo(amount) < 0) {
             throw new IllegalStateException("Insufficient balance");
         }
-
         account.setBalance(account.getBalance().subtract(amount));
-
-        Transaction txn = TransactionMapper.toNewEntity(
-                new TransactionRequest() {{
-                    setTxnType("WITHDRAWAL");
-                    setAmount(amount);
-                    setFromAccountId(accountId);
-                    setDescription("Cash withdrawal");
-                }},
-                account,
-                null
-        );
-        txn.setStatus(TransactionStatus.COMPLETED);
-
         accountRepository.save(account);
-        transactionRepository.save(txn);
     }
 
     @Override
@@ -139,30 +109,14 @@ public class AccountServiceImpl implements AccountService {
 
         ensureActive(from);
         ensureActive(to);
-
         if (from.getBalance().compareTo(amount) < 0) {
             throw new IllegalStateException("Insufficient balance");
         }
 
         from.setBalance(from.getBalance().subtract(amount));
         to.setBalance(to.getBalance().add(amount));
-
-        Transaction txn = TransactionMapper.toNewEntity(
-                new TransactionRequest() {{
-                    setTxnType("TRANSFER");
-                    setAmount(amount);
-                    setFromAccountId(fromAccountId);
-                    setToAccountId(toAccountId);
-                    setDescription("Account transfer");
-                }},
-                from,
-                to
-        );
-        txn.setStatus(TransactionStatus.COMPLETED);
-
         accountRepository.save(from);
         accountRepository.save(to);
-        transactionRepository.save(txn);
     }
 
     private void ensureActive(Account account) {
@@ -172,7 +126,6 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private String generateAccountNumber() {
-        // very simple example, you can improve with branch code + sequence
         return "ACCT-" + System.currentTimeMillis();
     }
 }

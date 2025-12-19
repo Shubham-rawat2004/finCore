@@ -39,6 +39,9 @@ public class Transaction {
     @JoinColumn(name = "from_account_id")
     private Account fromAccount;
 
+    @Column(name = "account_id")
+    private Long accountId;
+
     @ManyToOne
     @JoinColumn(name = "to_account_id")
     private Account toAccount;

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>FinCore Bank Dashboard</title>
+    <!-- CSS file in same folder -->
+    <link rel="stylesheet" href="ind.css" />
+</head>
+<body>
+<div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-logo">₹</span>
+            <span class="brand-name">FinCore</span>
+        </div>
+        <nav class="nav">
+            <button class="nav-link active" data-view="dashboard">Dashboard</button>
+            <button class="nav-link" data-view="customers">Customers</button>
+            <button class="nav-link" data-view="accounts">Accounts</button>
+            <button class="nav-link" data-view="transactions">Transactions</button>
+            <button class="nav-link" data-view="my-accounts">My Accounts</button>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="logoutBtn" class="btn-outline">Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main area -->
+    <main class="main">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-title">
+                <h1>Welcome to FinCore</h1>
+                <p>Secure banking dashboard for Admin, Banker & Customer.</p>
+            </div>
+            <div class="header-user">
+                <div class="user-info">
+                    <span id="currentRole">ROLE: GUEST</span>
+                    <span id="currentUser">Not logged in</span>
+                </div>
+                <button id="openAuthModal" class="btn-primary">Login / Register</button>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <section id="dashboardView" class="view active">
+            <div class="cards">
+                <div class="card gradient-1">
+                    <h2>Total Customers</h2>
+                    <p id="totalCustomers">0</p>
+                </div>
+                <div class="card gradient-2">
+                    <h2>Total Accounts</h2>
+                    <p id="totalAccounts">0</p>
+                </div>
+                <div class="card gradient-3">
+                    <h2>Today’s Transactions</h2>
+                    <p id="totalTxns">0</p>
+                </div>
+            </div>
+            <div class="panel">
+                <h2>Quick Tips</h2>
+                <ul>
+                    <li>Use the Login button to authenticate and get a JWT token.</li>
+                    <li>As <strong>ADMIN</strong>, manage customers and accounts.</li>
+                    <li>As <strong>BANKER</strong>, open accounts and perform transactions.</li>
+                    <li>As <strong>CUSTOMER</strong>, use “My Accounts” to view your balances and history.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Customers View -->
+        <section id="customersView" class="view">
+            <div class="panel panel-header">
+                <h2>Customers</h2>
+                <button id="loadCustomersBtn" class="btn-primary">Load Customers</button>
+            </div>
+            <div class="panel">
+                <h3>Create Customer</h3>
+                <form id="customerForm" class="form-grid">
+                    <input type="text" name="name" placeholder="Full Name" required />
+                    <input type="date" name="dateOfBirth" placeholder="Date of Birth" />
+                    <input type="email" name="email" placeholder="Email" required />
+                    <input type="text" name="phone" placeholder="Phone" />
+                    <input type="text" name="addressLine1" placeholder="Address Line 1" />
+                    <input type="text" name="addressLine2" placeholder="Address Line 2" />
+                    <input type="text" name="city" placeholder="City" />
+                    <input type="text" name="state" placeholder="State" />
+                    <input type="text" name="zipCode" placeholder="Zip Code" />
+                    <button class="btn-primary" type="submit">Create Customer</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h3>Customer List</h3>
+                <table id="customersTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Email</th><th>City</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Accounts View -->
+        <section id="accountsView" class="view">
+            <div class="panel panel-header">
+                <h2>Accounts</h2>
+                <button id="loadAccountsByCustomerBtn" class="btn-primary">Load by Customer ID</button>
+            </div>
+            <div class="panel">
+                <h3>Create Account</h3>
+                <form id="accountForm" class="form-grid">
+                    <input type="number" name="customerId" placeholder="Customer ID" required />
+                    <select name="accountType" required>
+                        <option value="">Account Type</option>
+                        <option value="SAVINGS">Savings</option>
+                        <option value="CURRENT">Current</option>
+                        <option value="FD">Fixed Deposit</option>
+                        <option value="LOAN_ACCOUNT">Loan Account</option>
+                    </select>
+                    <input type="number" step="0.01" name="initialDeposit" placeholder="Initial Deposit" required />
+                    <button class="btn-primary" type="submit">Create Account</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h3>Accounts for Customer</h3>
+                <div class="inline-form">
+                    <input type="number" id="accountsCustomerId" placeholder="Customer ID" />
+                    <button id="fetchCustomerAccountsBtn" class="btn-secondary">Fetch Accounts</button>
+                </div>
+                <table id="accountsTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th><th>Number</th><th>Type</th><th>Balance</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="panel">
+                <h3>Quick Operations</h3>
+                <form id="depositForm" class="inline-form">
+                    <input type="number" name="accountId" placeholder="Account ID" required />
+                    <input type="number" step="0.01" name="amount" placeholder="Deposit Amount" required />
+                    <button class="btn-success" type="submit">Deposit</button>
+                </form>
+                <form id="withdrawForm" class="inline-form">
+                    <input type="number" name="accountId" placeholder="Account ID" required />
+                    <input type="number" step="0.01" name="amount" placeholder="Withdraw Amount" required />
+                    <button class="btn-danger" type="submit">Withdraw</button>
+                </form>
+                <form id="transferForm" class="inline-form">
+                    <input type="number" name="fromAccountId" placeholder="From Account ID" required />
+                    <input type="number" name="toAccountId" placeholder="To Account ID" required />
+                    <input type="number" step="0.01" name="amount" placeholder="Amount" required />
+                    <button class="btn-warning" type="submit">Transfer</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Transactions View -->
+        <section id="transactionsView" class="view">
+            <div class="panel panel-header">
+                <h2>Transactions</h2>
+            </div>
+            <div class="panel">
+                <h3>Create Transaction</h3>
+                <form id="txnForm" class="form-grid">
+                    <select name="txnType" required>
+                        <option value="">Transaction Type</option>
+                        <option value="DEPOSIT">Deposit</option>
+                        <option value="WITHDRAWAL">Withdrawal</option>
+                        <option value="TRANSFER">Transfer</option>
+                        <option value="PAYMENT">Payment</option>
+                    </select>
+                    <input type="number" name="fromAccountId" placeholder="From Account ID (optional)" />
+                    <input type="number" name="toAccountId" placeholder="To Account ID (optional)" />
+                    <input type="number" step="0.01" name="amount" placeholder="Amount" required />
+                    <input type="text" name="description" placeholder="Description" />
+                    <button class="btn-primary" type="submit">Create Transaction</button>
+                </form>
+            </div>
+            <div class="panel">
+                <h3>Transactions by Account</h3>
+                <div class="inline-form">
+                    <input type="number" id="txAccountId" placeholder="Account ID" />
+                    <button id="fetchTxByAccountBtn" class="btn-secondary">Fetch Transactions</button>
+                </div>
+                <table id="txTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- My Accounts View -->
+        <section id="myAccountsView" class="view">
+            <div class="panel panel-header">
+                <h2>My Accounts</h2>
+            </div>
+            <div class="panel">
+                <button id="loadMyAccountsBtn" class="btn-primary">Load My Accounts</button>
+                <table id="myAccountsTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th><th>Number</th><th>Type</th><th>Balance</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="panel">
+                <h3>Transactions for My Account</h3>
+                <div class="inline-form">
+                    <input type="number" id="myAccIdForTx" placeholder="My Account ID" />
+                    <button id="loadMyTxBtn" class="btn-secondary">Load Transactions</button>
+                </div>
+                <table id="myTxTable">
+                    <thead>
+                    <tr>
+                        <th>ID</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Notification area -->
+        <div id="toast" class="toast hidden"></div>
+    </main>
+</div>
+
+<!-- Auth Modal -->
+<div id="authModal" class="modal hidden">
+    <div class="modal-content">
+        <button id="closeAuthModal" class="modal-close">&times;</button>
+        <div class="tabs">
+            <button class="tab-link active" data-tab="loginTab">Login</button>
+            <button class="tab-link" data-tab="registerTab">Register</button>
+        </div>
+        <div id="loginTab" class="tab active">
+            <h2>Login</h2>
+            <form id="loginForm" class="form-grid">
+                <input type="text" name="username" placeholder="Username" required />
+                <input type="password" name="password" placeholder="Password" required />
+                <button class="btn-primary" type="submit">Login</button>
+            </form>
+        </div>
+        <div id="registerTab" class="tab">
+            <h2>Register</h2>
+            <form id="registerForm" class="form-grid">
+                <input type="text" name="username" placeholder="Username" required />
+                <input type="password" name="password" placeholder="Password" required />
+                <select name="role" required>
+                    <option value="">Role</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="BANKER">Banker</option>
+                    <option value="CUSTOMER">Customer</option>
+                </select>
+                <input type="number" name="customerId" placeholder="Customer ID (for CUSTOMER)" />
+                <button class="btn-primary" type="submit">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JS file in same folder -->
+<script src="ind.js"></script>
+</body>
+</html>

@@ -2,7 +2,6 @@ package com.rawat.FinCore.Entities;
 
 import com.rawat.FinCore.Enum.Role;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;

@@ -27,7 +27,6 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
     }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -36,7 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/customers/**").hasRole("ADMIN")
+                        .requestMatchers("/api/customers/**").permitAll()  // *** FIXED! ***
                         .requestMatchers("/api/accounts/**").hasAnyRole("ADMIN", "BANKER")
                         .requestMatchers("/api/transactions/**").hasAnyRole("ADMIN", "BANKER")
                         .anyRequest().authenticated()
@@ -46,6 +45,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

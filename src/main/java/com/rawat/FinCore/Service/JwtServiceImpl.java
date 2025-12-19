@@ -4,7 +4,6 @@ import com.rawat.FinCore.Entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-// remove this: import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import java.util.function.Function;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    // plain long random secret, NOT base64
     private static final String SECRET_KEY =
             "this-is-a-very-long-random-secret-key-change-me-1234567890";
 
@@ -29,6 +27,9 @@ public class JwtServiceImpl implements JwtService {
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRole().name());
+        if (user.getUserId() != null) {
+            claims.put("customerId", user.getUserId());
+        }
         return buildToken(claims, user.getUsername());
     }
 
@@ -57,6 +58,14 @@ public class JwtServiceImpl implements JwtService {
                 .parseClaimsJws(token)
                 .getBody();
         return resolver.apply(claims);
+    }
+
+    // *** NEW METHOD ADDED ***
+    public Long extractCustomerId(String token) {
+        return extractClaim(token, claims -> {
+            Object customerId = claims.get("customerId");
+            return customerId instanceof Number ? ((Number) customerId).longValue() : null;
+        });
     }
 
     @Override

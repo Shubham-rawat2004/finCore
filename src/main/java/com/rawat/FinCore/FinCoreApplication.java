@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class FinCoreApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(FinCoreApplication.class, args);
         System.out.println("Let's start building FinCore");
