@@ -58,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<AccountSummaryDto> getCustomerAccounts(Long customerId) {
-        List<Account> accounts = accountRepository.findByCustomerId(customerId);
+        List<Account> accounts = accountRepository.findByCustomerCustomerId(customerId);
         return accounts.stream()
                 .map(AccountMapper::toSummary)
                 .collect(Collectors.toList());

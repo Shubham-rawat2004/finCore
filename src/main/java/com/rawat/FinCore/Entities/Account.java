@@ -5,7 +5,8 @@ import com.rawat.FinCore.Entities.Customer;
 import com.rawat.FinCore.Enum.AccountStatus;
 import com.rawat.FinCore.Enum.AccountType;
 import jakarta.persistence.*;
-import jakarta.transaction.Transaction;
+import com.rawat.FinCore.Entities.Transaction;
+
 import lombok.Data;
 
 import java.math.BigDecimal;
